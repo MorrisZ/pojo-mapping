@@ -4,13 +4,13 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -30,5 +30,12 @@ public class FreeMarkerHelper {
         Template template = conf.getTemplate(templateName);
         FileWriter fileWriter = new FileWriter(outFile);
         template.process(data, fileWriter);
+    }
+
+    public void processToLogger(String templateName, Map<String, Object> data, Log logger) throws Exception {
+        Template template = conf.getTemplate(templateName);
+        StringWriter sw = new StringWriter();
+        template.process(data, sw);
+        logger.info("model output\n " + sw.toString());
     }
 }

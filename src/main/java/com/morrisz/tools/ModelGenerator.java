@@ -27,11 +27,20 @@ public class ModelGenerator extends AbstractMojo {
     @Component
     private PluginDescriptor pluginDescriptor;
 
-    @Parameter(required = true, property = "modelCls")
+    @Parameter(required = true, property = "class")
     private String modelClassName;
 
-    @Parameter(required = true, property = "out")
+    /**
+     * output to Logger by default
+     */
+    @Parameter(required = false, property = "out")
     private String out;
+
+    /**
+     * using extjs style by default
+     */
+    @Parameter(required = false, property = "style")
+    private String style;
 
     public void execute() throws MojoExecutionException {
         getLog().info("start executing genModel");
@@ -45,10 +54,19 @@ public class ModelGenerator extends AbstractMojo {
             Map<String, Object> data = reflectionHelper.reflect(cls);
             data.put("pluginVersion", pluginDescriptor.getVersion());
 
-            File outFile = new File(out);
+            String templateName = "extjs.ftl";
+            if (style != null) {
+                templateName = style;
+            }
+
             FreeMarkerHelper freeMarkerHelper = new FreeMarkerHelper();
-            freeMarkerHelper.processToFile("model.ftl", data, outFile);
-            getLog().info("generated file: " + outFile.getAbsolutePath());
+            if (out != null) {
+                File outFile = new File(out);
+                freeMarkerHelper.processToFile(templateName, data, outFile);
+                getLog().info("generated file: " + outFile.getAbsolutePath());
+            } else {
+                freeMarkerHelper.processToLogger(templateName, data, getLog());
+            }
         } catch (Exception e) {
             getLog().error(e);
             throw new MojoExecutionException(e.toString());
